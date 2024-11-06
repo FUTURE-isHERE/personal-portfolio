@@ -10,7 +10,7 @@ import { useAdminContextProvider } from "@/context/admin-context-provider";
 import { menuListType } from "../types";
 
 function Page() {
-  const { activeTab, handleSelectedTab } = useAdminContextProvider();
+  const { activeTab, handleSelectedTab, resetFormData } = useAdminContextProvider();
 
   const menuList: menuListType[] = [
     {
@@ -51,7 +51,10 @@ function Page() {
         {menuList.map((item: menuListType) => (
           <button
             key={item.id}
-            onClick={() => handleSelectedTab(item.id)}
+            onClick={() => {
+              handleSelectedTab(item.id);
+              resetFormData();
+            }}
             className={`px-4 py-2 text-white font-semibold transition-colors duration-300 rounded-lg ${
               activeTab === item.id
                 ? "bg-blue-600 hover:bg-blue-700"
@@ -63,14 +66,13 @@ function Page() {
         ))}
       </nav>
 
-      <div className="mt-8 p-6 bg-white shadow-lg rounded-lg ">
+      <div className="m-14 p-6 bg-white shadow-lg rounded-lg ">
         {
           menuList.find((item: menuListType) => item.id === activeTab)
             ?.component
         }
       </div>
     </div>
-
   );
 }
 

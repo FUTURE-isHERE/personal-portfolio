@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const connectToDb = async () => {
   try {
     await mongoose.connect(
-      `mongodb+srv://bhavishyahchauhan322:${process.env.MONGODB_PASSWORD}@cluster0.hgqmc.mongodb.net/`
+      `mongodb+srv://user1:${process.env.MONGODB_PASSWORD}@cluster0.hgqmc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
     );
     console.log("Database connected!");
   } catch (error) {
