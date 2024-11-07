@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const HomeSchema = new mongoose.Schema(
   {
+    name: String,
     heading: String,
     summary: String,
   },

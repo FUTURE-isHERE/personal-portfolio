@@ -6,6 +6,12 @@ import RenderDbData from "./render-db-data";
 
 const controls: controlsType[] = [
   {
+    name: "name",
+    placeholder: "Enter Your Name",
+    type: "text",
+    label: "Name",
+  },
+  {
     name: "heading",
     placeholder: "Enter Heading Text",
     type: "text",
