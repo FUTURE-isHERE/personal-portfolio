@@ -6,7 +6,6 @@ import Education from "../components/admin-view/education";
 import Experience from "../components/admin-view/experience";
 import Projects from "../components/admin-view/projects";
 import Home from "../components/admin-view/home";
-import ResumeSection from "../components/admin-view/resume-section";
 import { useAdminContextProvider } from "@/context/admin-context-provider";
 import { menuListType } from "../types";
 
@@ -43,11 +42,6 @@ function Page() {
       id: "contact",
       label: "Contact",
       component: <Contact />,
-    },
-    {
-      id: "resume",
-      label: "Resume",
-      component: <ResumeSection />,
     },
   ];
 
