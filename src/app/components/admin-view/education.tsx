@@ -1,10 +1,7 @@
-"use client";
-
 import { useAdminContextProvider } from "@/context/admin-context-provider";
 import FormControl from "./form-control";
 import RenderDbData from "./render-db-data";
 import { FormDataType } from "@/app/types";
-import { useState } from "react";
 import Modal from "../modal";
 
 const Education = () => {
@@ -31,74 +28,68 @@ const Education = () => {
 
   const {
     educationData,
-    setEducationData,
-    handleSaveData,
     allData,
     isUpdating,
-    setIsUpdating,
     handleDeleteClick,
     isModalOpen,
     setIsModalOpen,
     handleConfirmDelete,
+    handleEdit,
+    handleAddSection,
+    isAddingNewSection,
   } = useAdminContextProvider();
 
-  const [prevEducationData, setPrevEducationData] =
-    useState<FormDataType | null>(null);
+  const renderEducationSection = () => {
+    if (isUpdating) {
+      return (
+        <FormControl
+          controls={controls}
+          formData={educationData}
+        />
+      );
+    }
 
+    if (allData?.education?.length > 0) {
+      return allData.education.map((data: FormDataType) => (
+        <div key={data._id}>
+          <RenderDbData
+            data={data}
+            controls={controls}
+            handleEdit={() => handleEdit(data._id)}
+            handleDeleteClick={() => handleDeleteClick(data._id)}
+          />
+        </div>
+      ));
+    }
 
-  const handleEdit = () => {
-    setPrevEducationData(educationData);
-    setIsUpdating(true);
-  };
-  const handleCancel = () => {
-    setEducationData(prevEducationData ?? {});
-    setIsUpdating(false);
+    return (
+      <FormControl
+        controls={controls}
+        formData={educationData}
+      />
+    );
   };
 
   return (
     <div className="bg-white p-8 shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-6">Education Section</h2>
-      {isUpdating ? (
-        <FormControl
-          controls={controls}
-          formData={educationData}
-          setFormData={setEducationData}
-        />
-      ) : allData?.education?.length > 0 ? (
-        allData?.education?.map((data: FormDataType) => (
-          <div key={data._id}>
-            <RenderDbData
-              data={data}
-              controls={controls}
-              handleEdit={handleEdit}
-              handleDeleteClick={() => handleDeleteClick(data._id)}
-            />
-          </div>
-        ))
-      ) : (
-        <FormControl
-          controls={controls}
-          formData={educationData}
-          setFormData={setEducationData}
-        />
-      )}
+      <div className="flex justify-between">
+        <h2 className="text-2xl font-bold mb-6">Education Section</h2>
+        <button
+          onClick={handleAddSection}
+          className="px-2 h-10 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors duration-300"
+        >
+          Add Section
+        </button>
+      </div>
+
+      {renderEducationSection()}
 
       <div>
-        {isUpdating && (
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleSaveData("education", true)}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Update Info
-            </button>
-            <button
-              onClick={handleCancel}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Cancel
-            </button>
-          </div>
+        {isAddingNewSection && (
+          <FormControl
+            controls={controls}
+            formData={educationData}
+          />
         )}
       </div>
 

@@ -1,8 +1,6 @@
-"use client";
 
 import { useAdminContextProvider } from "@/context/admin-context-provider";
 import FormControl from "./form-control";
-import { useState } from "react";
 import { FormDataType } from "@/app/types";
 import RenderDbData from "./render-db-data";
 import Modal from "../modal";
@@ -50,74 +48,67 @@ const Projects = () => {
 
   const {
     projectsData,
-    setProjectsData,
-    handleSaveData,
     allData,
     isUpdating,
-    setIsUpdating,
     handleDeleteClick,
     isModalOpen,
     setIsModalOpen,
     handleConfirmDelete,
+    handleEdit,
+    handleAddSection,
+    isAddingNewSection
   } = useAdminContextProvider();
 
-  const [prevProjectsData, setPrevProjectsData] = useState<FormDataType | null>(
-    null
-  );
+  const renderProjectsSection = () => {
+    if (isUpdating) {
+      return (
+        <FormControl
+          controls={controls}
+          formData={projectsData}
+        />
+      );
+    }
 
-  const handleEdit = () => {
-    setPrevProjectsData(projectsData);
-    setIsUpdating(true);
-  };
-  const handleCancel = () => {
-    setProjectsData(prevProjectsData ?? {});
-    setIsUpdating(false);
-  };
+    if (allData?.projects?.length > 0) {
+      return allData.projects.map((data: FormDataType) => (
+        <div key={data._id}>
+          <RenderDbData
+            data={data}
+            controls={controls}
+            handleEdit={() => handleEdit(data._id)}
+            handleDeleteClick={() => handleDeleteClick(data._id)}
+          />
+        </div>
+      ));
+    }
 
+    return (
+      <FormControl
+        controls={controls}
+        formData={projectsData}
+      />
+    );
+  };
   return (
     <div className="bg-white p-8 shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-6">Projects Section</h2>
-      {isUpdating ? (
-        <FormControl
-          controls={controls}
-          formData={projectsData}
-          setFormData={setProjectsData}
-        />
-      ) : allData?.projects?.length > 0 ? (
-        allData?.projects?.map((data: FormDataType) => (
-          <div key={data._id}>
-            <RenderDbData
-              data={data}
-              controls={controls}
-              handleEdit={handleEdit}
-              handleDeleteClick={() => handleDeleteClick(data._id)}
-            />
-          </div>
-        ))
-      ) : (
-        <FormControl
-          controls={controls}
-          formData={projectsData}
-          setFormData={setProjectsData}
-        />
-      )}
+      <div className="flex justify-between">
+        <h2 className="text-2xl font-bold mb-6">Projects Section</h2>
+        <button
+          onClick={handleAddSection}
+          className="px-2 h-10 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors duration-300"
+        >
+          Add Section
+        </button>
+      </div>
+
+      {renderProjectsSection()}
 
       <div>
-        {isUpdating && (
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleSaveData("projects", true)}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Update Info
-            </button>
-            <button
-              onClick={handleCancel}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Cancel
-            </button>
-          </div>
+        {isAddingNewSection && (
+          <FormControl
+            controls={controls}
+            formData={projectsData}
+          />
         )}
       </div>
 

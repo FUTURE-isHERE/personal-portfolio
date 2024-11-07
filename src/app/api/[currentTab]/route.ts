@@ -5,6 +5,7 @@ import About from "@/models/about";
 import Education from "@/models/education";
 import Experience from "@/models/experience";
 import Project from "@/models/projects";
+import { ObjectId } from "mongodb"; 
 
 export const dynamic = "force-dynamic";
 
@@ -112,10 +113,10 @@ export async function PATCH(
     await connectToDb();
     const extractData = await req.json();
 
-    const {_id, ...restData} = extractData
+    const { sectionId, ...restData} = extractData
 
     const updateData = await Model.findOneAndUpdate(
-      { _id },
+      { _id: new ObjectId(sectionId) },
       { $set: restData },
       { new: true }
     );

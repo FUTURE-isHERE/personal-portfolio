@@ -39,29 +39,22 @@ type ContextType = {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isAddingNewSection: boolean;
   setIsAddingNewSection: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedId: string | null;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | null>>;
+  handleEdit: (sectionId: string) => void;
+  handleAddSection: () => void;
 };
 const AdminContext = createContext<ContextType>({} as ContextType);
 
 const initialHomeFormData: FormDataType[] = [];
 
-const initialAboutData: FormDataType[] = [
-  {
-    aboutme: "",
-    noofprojects: "",
-    yearofexperience: "",
-    skills: "",
-  },
-];
+const initialAboutData: FormDataType[] = [];
 
-const initialEducationData: FormDataType[] = [
-  { degree: "", year: "", college: "" },
-];
+const initialEducationData: FormDataType[] = [];
 
 const initialExperienceData: FormDataType[] = [];
 
-const initialProjectsData: FormDataType[] = [
-  { name: "", description: "", stack: "", website: "", github: "" },
-];
+const initialProjectsData: FormDataType[] = [];
 
 const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeTab, setActiveTab] = useState<string>("home");
@@ -76,16 +69,50 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isAddingNewSection, setIsAddingNewSection] = useState(false);
 
-  console.log("homeFormData", homeFormData);
-  // console.log("aboutData", aboutData);
-  // console.log("educationData", educationData);
-  console.log("experienceData", experienceData);
-  // console.log("projectsData", projectsData);
-
   const handleSelectedTab = useCallback((tabId: string) => {
     setActiveTab(tabId);
   }, []);
 
+  const handleAddSection = () => {
+    const dataMap = {
+      home: homeFormData,
+      about: aboutData,
+      education: educationData,
+      experience: experienceData,
+      projects: projectsData,
+    };
+    const stateData = dataMap[activeTab as keyof typeof dataMap];
+    if (isUpdating) {
+      setIsUpdating(false);
+      setSelectedId(null);
+    }
+    if (stateData.length !== 0) {
+      setIsAddingNewSection(true);
+      setIsUpdating(false);
+    }
+  };
+
+  const handleEdit = (sectionId: string) => {
+    setSelectedId(sectionId);
+    setIsUpdating(true);
+  };
+
+  const handleSaveData = async (currentTab: string, data: FormDataType) => {
+    let response;
+
+    if (selectedId && isUpdating) {
+      response = await updateData(currentTab, selectedId, data);
+      setIsUpdating(false);
+      setSelectedId(null);
+    } else {
+      response = await addData(currentTab, data);
+    }
+
+    if (response?.success) {
+      extractDataFromDb(currentTab);
+      setIsAddingNewSection(false);
+    }
+  };
   const extractDataFromDb = async (currentTab: string) => {
     const data = await getData(currentTab);
 
@@ -105,43 +132,11 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
-    // if (currentTab === "home" && data?.data?.length) {
-    //   setHomeFormData(data.data[0]);
-    // }
     if (data) {
       setAllData({
         ...allData,
         [currentTab]: data.data,
       });
-    }
-  };
-
-  const handleSaveData = async (
-    currentTab: string,
-    data: FormDataType,
-    isUpdatingFields?: boolean
-  ) => {
-    const dataMap = {
-      home: homeFormData,
-      about: aboutData,
-      education: educationData,
-      experience: experienceData,
-      projects: projectsData,
-    };
-
-    const dataToSave = dataMap[currentTab as keyof typeof dataMap];
-    console.log("dataToSave", dataToSave);
-
-    const response = await addData(currentTab, data);
-
-    if (isUpdating) {
-      setIsUpdating(false);
-    }
-
-    if (response?.success) {
-      // resetFormData();
-      extractDataFromDb(currentTab);
-      setIsAddingNewSection(false);
     }
   };
 
@@ -171,8 +166,14 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setIsUpdating(false);
+    setIsAddingNewSection(false);
     extractDataFromDb(activeTab);
   }, [activeTab]);
+  useEffect(() => {
+    if (!isModalOpen || !isUpdating) {
+      setIsAddingNewSection(false);
+    }
+  }, [isModalOpen, isUpdating]);
 
   const value = useMemo(
     () => ({
@@ -199,6 +200,10 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
       setIsModalOpen,
       isAddingNewSection,
       setIsAddingNewSection,
+      selectedId,
+      setSelectedId,
+      handleEdit,
+      handleAddSection,
     }),
     [
       activeTab,
@@ -211,6 +216,7 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
       isUpdating,
       allData,
       isModalOpen,
+      isAddingNewSection,
     ]
   );
   return (

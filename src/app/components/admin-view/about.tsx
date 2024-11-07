@@ -1,10 +1,7 @@
-"use client";
-
 import { useAdminContextProvider } from "@/context/admin-context-provider";
 import FormControl from "./form-control";
 import Modal from "../modal";
 import RenderDbData from "./render-db-data";
-import { useState } from "react";
 import { FormDataType } from "@/app/types";
 
 const About = () => {
@@ -36,74 +33,51 @@ const About = () => {
   ];
   const {
     aboutData,
-    setAboutData,
-    handleSaveData,
     allData,
     isUpdating,
-    setIsUpdating,
     handleDeleteClick,
     isModalOpen,
     setIsModalOpen,
     handleConfirmDelete,
+    handleEdit,
   } = useAdminContextProvider();
 
-  const [prevAboutData, setPrevAboutData] = useState<FormDataType | null>(null);
+  const renderAboutSection = () => {
+    if (isUpdating) {
+      return (
+        <FormControl
+          controls={controls}
+          formData={aboutData}
+        />
+      );
+    }
 
-  const handleEdit = () => {
-    setPrevAboutData(aboutData);
-    setIsUpdating(true);
-  };
-  const handleCancel = () => {
-    setAboutData(prevAboutData ?? {});
-    setIsUpdating(false);
+    if (allData?.about?.length > 0) {
+      return allData.about.map((data: FormDataType) => (
+        <div key={data._id}>
+          <RenderDbData
+            data={data}
+            controls={controls}
+            handleEdit={() => handleEdit(data._id)}
+            handleDeleteClick={() => handleDeleteClick(data._id)}
+          />
+        </div>
+      ));
+    }
+
+    return (
+      <FormControl
+        controls={controls}
+        formData={aboutData}
+      />
+    );
   };
 
   return (
     <div className="bg-white p-8 shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-6">About Section</h2>
-      {isUpdating ? (
-        <FormControl
-          controls={controls}
-          formData={aboutData}
-          setFormData={setAboutData}
-        />
-      ) : allData?.about?.length > 0 ? (
-        allData?.about?.map((data: FormDataType) => (
-          <div key={data._id}>
-            <RenderDbData
-              data={data}
-              controls={controls}
-              handleEdit={handleEdit}
-              handleDeleteClick={() => handleDeleteClick(data._id)}
-            />
-          </div>
-        ))
-      ) : (
-        <FormControl
-          controls={controls}
-          formData={aboutData}
-          setFormData={setAboutData}
-        />
-      )}
 
-      <div>
-        {isUpdating && (
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleSaveData("about", true)}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Update Info
-            </button>
-            <button
-              onClick={handleCancel}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
+      {renderAboutSection()}
 
       <Modal
         isOpen={isModalOpen}

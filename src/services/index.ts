@@ -27,14 +27,16 @@ export async function getData(currentTab: string) {
   }
 }
 
-export async function updateData(currentTab: string, formData: FormDataType) {
+export async function updateData(currentTab: string, sectionId: string, formData: FormDataType) {
+  console.log('formData', formData)
+  console.log('sectionId', sectionId);
   try {
     const response = await fetch(`/api/${currentTab}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({ sectionId, ...formData }),
     });
     const data = await response.json();
     return data;
